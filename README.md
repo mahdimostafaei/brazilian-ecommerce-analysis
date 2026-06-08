@@ -146,25 +146,27 @@ Delivery Outliers
 A small subset of orders experiences significantly longer delivery times, which can distort average delivery metrics. Identifying these outliers helps isolate potential logistics failures.
 ________________________________________
 # Repository Structure
+```
 project-root
-|
---- 01_raw_data
-|   --- (9 Olist csv files)
-|
---- 02_clean_data
-|   --- 01_data_check
-|   --- (9 clean Olist csv files)
-|
---- 03_sql_modeling
-|   --- 01_sql_scripts
-|
---- 04_powerbi
-|   --- powerbi_dashboard.pbix
-|
---- 05_media
-|   --- (7 .png files)
-|
---- README.md
+│
+├── 01_raw_data
+│   └── (9 Olist csv files)
+│
+├── 02_clean_data
+│   ├── 01_data_check
+│   └── (9 clean Olist csv files)
+│
+├── 03_sql_modeling
+│   └── 01_sql_scripts
+│
+├── 04_powerbi
+│   └── powerbi_dashboard.pbix
+│
+├── 05_media
+│   └── (7 .png files)
+│
+└── README.md
+```
 ________________________________________
 # Future Improvements
 Potential extensions for this analysis include:
