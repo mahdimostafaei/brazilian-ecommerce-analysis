@@ -8,8 +8,8 @@ Goal: Analyze marketplace performance across customers, products, sellers and de
 ### Main Performance
 ![Dashboard](05_media/preview.png)
 
-Project Workflow
-Stage 1 : Data Exploration
+# Project Workflow
+## Stage 1 : Data Exploration
 The dataset contains nine tables describing different aspects of marketplace operations, including customers, orders, sellers, products, payments, reviews, and geolocation data.
 Initial exploration focused on:
 -	Understanding table relationships
@@ -28,7 +28,7 @@ Key entities identified during exploration:
 -	Geolocation information
 This stage established the logical structure of the dataset and informed the analytical design of the project.
 ________________________________________
-Stage 2 : Data Cleaning & Validation
+## Stage 2 : Data Cleaning & Validation
 Initial cleaning and validation were performed using Python to ensure dataset integrity before modeling.
 Key steps included:
 -	Identifying missing values across operational timestamps
@@ -38,7 +38,7 @@ Key steps included:
 -	Confirming key uniqueness and join compatibility
 This step ensured the dataset could support reliable analytical modeling.
 ________________________________________
-Stage 3 : Data Modeling Design
+## Stage 3 : Data Modeling Design
 A star schema approach was implemented to support efficient analytical queries and Power BI performance.
 Fact Table
 fact_sales
@@ -70,7 +70,7 @@ Helping Tables
 Delivery and Seller performance metrics were maintained at the order level, while product category information exists at the order-item level. This difference in grain required careful handling during metric calculations.
 The star schema structure allows efficient filtering across multiple analytical dimensions.
 ________________________________________
-Stage 4 : Feature Engineering
+## Stage 4 : Feature Engineering
 Additional analytical features were derived to support business insights.
 Examples include but not limited to:
 -	Freight-to-revenue ratio
@@ -80,7 +80,7 @@ Examples include but not limited to:
 -	Distribution bins
 These features enabled deeper analysis of marketplace performance.
 ________________________________________
-Stage 5 : Power BI Data Model
+## Stage 5 : Power BI Data Model
 The cleaned dataset was imported into Power BI and structured using a star schema model.
 Key modeling decisions included:
 -	A dedicated date dimension for time-based analysis
@@ -89,7 +89,7 @@ Key modeling decisions included:
 -	Ensuring correct filter propagation across fact and dimension tables
 Special care was required to handle grain mismatches between order-level delivery metrics and order-item-level product attributes.
 ________________________________________
-Stage 6 : DAX Metrics & Analytical Logic
+## Stage 6 : DAX Metrics & Analytical Logic
 A range of DAX measures were implemented to support business analysis. They are grouped as page x measures.
 Examples include:
 -	Total Revenue
@@ -103,7 +103,7 @@ Upper Bound = Q3 + 1.5 * IQR
 Orders exceeding this threshold were flagged as abnormal deliveries and categorized by severity level. This allows operational teams to quickly identify logistics issues.
 A more detailed info is available from  
 ________________________________________
-Stage 7 : Dashboard Design
+## Stage 7 : Dashboard Design
 The final Power BI dashboard is organized into six analytical pages:
 Main
 -	Overall performance
@@ -133,7 +133,7 @@ The dashboard supports interactive filtering across:
 -	Seller segments
 This structure allows stakeholders to explore performance across multiple dimensions.
 ________________________________________
-Key Insights
+# Key Insights
 Revenue Concentration
 A small percentage of customers generate a large share of marketplace revenue, highlighting the importance of customer retention strategies.
 Customers number of purchases distribution
@@ -145,7 +145,7 @@ Freight costs vary substantially across regions and categories. The freight-to-r
 Delivery Outliers
 A small subset of orders experiences significantly longer delivery times, which can distort average delivery metrics. Identifying these outliers helps isolate potential logistics failures.
 ________________________________________
-Repository Structure
+# Repository Structure
 project-root
 |
 --- 01_raw_data
@@ -166,10 +166,7 @@ project-root
 |
 --- README.md
 ________________________________________
-Dashboard Preview 
-(05_media/preview.png)
-________________________________________
-Future Improvements
+# Future Improvements
 Potential extensions for this analysis include:
 -	Customer cohort analysis
 -	Customer lifetime value modeling
