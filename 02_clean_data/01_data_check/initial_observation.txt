@@ -1,0 +1,255 @@
+Olist E-commerce analysis
+
+#Data schema
+
+Total Tables: 9
+
+Table: customers(dim)
+Rows ~497210
+Primary Key: customer_id
+Important analytical ID: customer_unique_id
+(identifies the real customer across orders)
+Row meaning: one customer record linked to an order
+Connections: customer_zip_code_prefix --> geolocation_zip_code_prefix,
+customer_city/state --> geolocation_location_city/state 
+Timestamps: none
+
+Table: Orders(dim)
+Rows ~790628
+Primary Key: order_id
+Row meaning: one order
+Connections: customer_id --> customers
+Timestamps: order_purchase_timestamp, order_approved_at,
+order_delivered_carrier_date, order_delivered_customer_date,
+order_estimated_delivery_date
+
+
+Table: Geo-location(dim)
+Rows ~5000820
+Primary Key: none
+Row meaning: one recorded coordinate associated with a zip code prefix
+Connections: geolocation_zip_code_prefix → customer_zip_code_prefix/
+seller_zip_code_prefix
+Timestamps: none
+
+Table: Order_payments(dim)
+Rows ~519435
+Primary Key: (order_id, payment_sequential)
+Row meaning: one payment record
+Connections: order_id --> orders
+Timestamps: none
+
+Table: order_review(dim)
+Rows ~548672
+Primary Key: (none guaranteed)~review_id 
+Row meaning: one review associated with an order
+Connections: order_id --> orders
+Timestamps: review_creation_date, review_answer_timestamp
+
+Table: order_items(fact_table)
+Rows ~778557
+Primary Key: (order_id, order_item_id)
+Row meaning: one product item inside an order
+Connections: order_id --> orders, product_id --> products,
+seller_id -->sellers
+Timestamps: shipping_limit_date
+
+Table: products(dim)
+Rows ~294120
+Primary Key: product_id
+Row meaning: one product described
+Connections:
+product_id → order_items,
+product_category_name → product_category_name_translation
+Timestamps: 
+
+Table: sellers(dim)
+Rows ~12384
+Primary Key: seller_id
+Row meaning: one seller
+Connections: seller_zip_code_prefix	seller_city/state -->
+geolocation_zip_code_prefix, geolocation_location_city/state
+Timestamps: none
+
+Table: product_category_name_translation(dim)
+Rows ~144
+Primary Key: none
+Row meaning: one name transition of a category
+Connections: product_category_name --> products
+Timestamps: none
+(note: this table only translates names from Portuguese to English)
+
+
+
+#Business Questions
+
+A. Financial Performance (The “Bottom Line”)
+Total Revenue: Sum of price.
+YoY Revenue Growth: Revenue compared to the previous year.
+Net Revenue: Revenue minus freight_value (if we consider freight as a cost incurred by the customer,
+or perhaps total_order_value = price + freight_value). Recommendation: Calculate both gross (price) and total (price + freight).
+
+B. Customer Insights
+Customer Growth (YoY): Number of unique customers acquired per year.
+Geographic Distribution: Unique customers by customer_state.
+Loyalty Metrics:
+Repurchase Rate: Percentage of customers who purchased more than once.
+Churn Rate: Customers who made a purchase in a previous year but not the current one.
+LTV (Lifetime Value): Average total spend per customer.
+Order Status/Conversion:
+Decision: Include in Customer Insights. It shows customer satisfaction/trust.
+Metrics: Percentage of orders by status (e.g., delivered vs. canceled).
+
+C. Seller Analysis
+Top Sellers: Rank by total revenue generated.
+Top Sellers by Region: Top sellers by seller_state.
+Approval Latency: Average time between order_purchase_timestamp and order_approved_at.
+Note: Yes, this relates to sellers because it reflects their operational speed.
+
+D. Delivery Analysis
+Logistics Costs: Average freight_value per region and per order value.
+Delivery Performance:
+Actual Delivery Time: order_delivered_customer_date - order_purchase_timestamp (Total time) vs.
+order_delivered_customer_date - order_delivered_carrier_date (Logistics time).
+Delivery Accuracy: order_estimated_delivery_date - order_delivered_customer_date (On-time/Late indicator).
+Size/Price Impact: Decision: Measuring delivery price per size
+(e.g., product weight/dimensions) is highly recommended if the data is available.
+
+E. Product Insights
+Category Performance: Revenue and volume (count of orders) by product_category_name.
+Product Segmentation: “Expensive vs. Budget” (use a price percentile or fixed price bands as a slicer).
+Customer Ratings: Decision: Include here. Ratings are usually tied to products and impact future sales.
+Basket Analysis: Average items per order.
+
+#Data Modling
+
+⭐ Fact Table: fact_sales
+Base table: order_items_clean
+
+Grain:
+One row per product per order.
+
+Measures:
+price
+freight_value
+Derived measures we will calculate later:
+
+total_item_value = price + freight_value
+delivery duration
+approval duration
+
+Keys (Foreign Keys to Dimensions)
+
+From order_items:
+
+order_id
+product_id
+seller_id
+
+From joining with orders:
+customer_id
+order_status
+timestamps
+
+#Dimensions
+
+dim_customers
+From: customers_clean
+
+Grain:
+
+One row per customer
+
+Columns:
+
+customer_id
+customer_state
+customer_city_normalized
+maybe first purchase date (derived later)
+
+Used for:
+customer growth
+churn
+region analysis
+LTV
+
+dim_products
+
+From: products_clean + translation table
+Grain:
+One row per product
+
+Columns:
+product_id
+product_category_name
+product_category_name_english
+product weight
+dimensions
+
+Used for:
+category performance
+delivery cost by size
+expensive vs budget tagging
+
+dim_sellers
+
+From: sellers_clean
+Grain:
+One row per seller
+
+Columns:
+seller_id
+seller_state
+seller_city_normalized
+
+Used for:
+top sellers
+regional seller performance
+operational efficiency
+
+dim_orders
+
+From: orders_clean
+Grain:
+One row per order
+
+Columns:
+order_id
+customer_id
+order_status
+purchase timestamp
+approval timestamp
+carrier date
+delivered date
+estimated delivery
+
+Used for:
+delivery performance
+approval latency
+order status analysis
+time intelligence
+
+dim_date (VERY IMPORTANT)
+
+We create this ourselves.
+Grain:
+One row per day
+
+Columns:
+date
+year
+quarter
+month
+month_name
+week
+year_month
+etc.
+
+
+                dim_customers
+                       |
+                dim_orders
+                       |
+dim_products --- fact_sales --- dim_sellers
+                       |
+                  dim_date
